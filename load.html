@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGUS: Session Recovery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE UI STYLES --- */
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #05050a;
+            color: #00f2ff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- SESSION RECOVERY FRAME --- */
+        .settings-frame {
+            width: 600px;
+            padding: 50px;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            background: linear-gradient(180deg, rgba(0, 242, 255, 0.03) 0%, transparent 100%);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .michroma-title {
+            font-size: 32px;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #00f2ff;
+            text-transform: uppercase;
+        }
+
+        .subtitle-small {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: rgba(0, 242, 255, 0.5);
+            margin-bottom: 40px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* --- LOAD SLOTS --- */
+        .load-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .load-card {
+            background: rgba(0, 229, 255, 0.02);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            padding: 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .load-card:hover:not(.corrupted) {
+            background: rgba(0, 229, 255, 0.08);
+            border-color: #00f2ff;
+            box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.1);
+        }
+
+        .load-card.active {
+            border-left: 4px solid #00f2ff;
+            background: rgba(0, 229, 255, 0.1);
+            border-color: rgba(0, 242, 255, 0.4);
+        }
+
+        .load-card.corrupted {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: rgba(255, 23, 68, 0.2);
+        }
+
+        .slot-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .hud-label { 
+            font-size: 14px; 
+            letter-spacing: 1px; 
+            font-weight: 700;
+        }
+
+        .slot-date {
+            font-size: 11px;
+            color: rgba(0, 242, 255, 0.6);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .slot-stats {
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #00f2ff;
+            opacity: 0.8;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-main {
+            background: transparent;
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            color: #00f2ff;
+            width: 320px;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-main:hover {
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+            border-color: #00f2ff;
+        }
+
+        .danger-btn {
+            color: #ff4b4b;
+            border-color: rgba(255, 75, 75, 0.3);
+        }
+
+        .danger-btn:hover {
+            color: #ff4b4b;
+            border-color: #ff4b4b;
+            background: rgba(255, 75, 75, 0.05);
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="settings-frame">
+        <h2 class="michroma-title">SESSION_RECOVERY</h2>
+        <div class="subtitle-small">Scanning Local Relay for Neural Backups...</div>
+
+        <div class="load-grid">
+            <div class="load-card active" onclick="selectSlot(this)">
+                <div class="slot-info">
+                    <span class="hud-label">SLOT_01 // SECTOR 7</span>
+                    <span class="slot-date">2085.03.04 | 22:14:09</span>
+                </div>
+                <div class="slot-stats">PROGRESS: 64% | LEVEL: VANGUARD</div>
+            </div>
+
+            <div class="load-card" onclick="selectSlot(this)">
+                <div class="slot-info">
+                    <span class="hud-label">SLOT_02 // SECTOR 4</span>
+                    <span class="slot-date">2085.02.28 | 03:45:12</span>
+                </div>
+                <div class="slot-stats">PROGRESS: 12% | LEVEL: RECRUIT</div>
+            </div>
+
+            <div class="load-card corrupted">
+                <div class="slot-info">
+                    <span class="hud-label" style="color: #FF1744;">SLOT_03 // DATA_CORRUPTED</span>
+                    <span class="slot-date">--.--.-- | --:--:--</span>
+                </div>
+                <div class="slot-stats" style="color: #FF1744;">RECOVERY IMPOSSIBLE</div>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn-main" onclick="restoreSession()">RESTORE SESSION</button>
+            <button class="btn-main danger-btn" onclick="goBack()">ABORT</button>
+        </div>
+    </div>
+
+    <script>
+        function selectSlot(element) {
+            if (element.classList.contains('corrupted')) return;
+            
+            document.querySelectorAll('.load-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        function restoreSession() {
+            const activeSlot = document.querySelector('.load-card.active .hud-label').innerText;
+            alert("Restoring " + activeSlot);
+            // Add redirection to game level here
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

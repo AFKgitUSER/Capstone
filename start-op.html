@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGUS: Protocol Nemesis // Neural Entry</title>
+    <style>
+        :root {
+            --neon-cyan: #00f2ff;
+            --dark-bg: #020205;
+            --exit-red: #ff4b4b;
+            --panel-bg: rgba(0, 8, 15, 0.95);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: var(--dark-bg);
+            color: var(--neon-cyan);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        /* --- 3D ENVIRONMENT --- */
+        #viewport {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            transition: transform 2.5s cubic-bezier(0.1, 0.8, 0.2, 1);
+            transform-style: preserve-3d;
+            transform: scale(1.5) rotateX(10deg);
+            opacity: 0;
+        }
+
+        .grid-floor {
+            position: absolute;
+            width: 600%; height: 400%;
+            bottom: -150%; left: -250%;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.15) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.15) 2px, transparent 2px);
+            background-size: 60px 60px;
+            transform: rotateX(75deg);
+            animation: moveGrid 0.8s linear infinite;
+        }
+
+        @keyframes moveGrid { from { background-position: 0 0; } to { background-position: 0 60px; } }
+
+        /* --- UI SCREENS --- */
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .active { display: flex; }
+
+        /* --- LOBBY SLIDING ELEMENTS --- */
+        #loadout-screen {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 8%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Left Side Slide */
+        .char-placeholder {
+            width: 45%;
+            height: 85vh;
+            background: linear-gradient(to top, rgba(0, 242, 255, 0.2), transparent);
+            border-left: 4px solid var(--neon-cyan);
+            clip-path: polygon(0 0, 75% 0, 100% 100%, 0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 30px var(--neon-cyan));
+            
+            /* Slide State */
+            transform: translateX(-120%);
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Right Side Slide */
+        .operator-panel {
+            width: 400px;
+            background: var(--panel-bg);
+            border: 1px solid var(--neon-cyan);
+            padding: 40px;
+            box-shadow: -20px 0 50px rgba(0, 242, 255, 0.1);
+            backdrop-filter: blur(15px);
+            position: relative;
+
+            /* Slide State */
+            transform: translateX(150%);
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s; /* Slight delay */
+        }
+
+        /* Entry Animation Trigger */
+        .slide-in-active .char-placeholder { transform: translateX(0); }
+        .slide-in-active .operator-panel { transform: translateX(0); }
+
+        /* --- UI DECOR --- */
+        .item-slot {
+            background: rgba(0, 242, 255, 0.05);
+            border-left: 2px solid var(--neon-cyan);
+            margin-bottom: 20px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .item-slot:hover { background: rgba(0, 242, 255, 0.15); transform: translateX(10px); }
+
+        .deploy-btn { 
+            width: 100%; 
+            padding: 20px;
+            background: var(--neon-cyan); 
+            color: #000; 
+            font-weight: bold; 
+            border: none; 
+            cursor: pointer; 
+            letter-spacing: 5px;
+            margin-top: 20px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        #loading-screen { transition: opacity 0.8s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <div id="viewport">
+        <div class="grid-floor"></div>
+    </div>
+
+    <div id="loading-screen" class="screen active">
+        <div style="width: 60px; height: 60px; border: 2px solid var(--neon-cyan); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
+        <p style="margin-top: 25px; letter-spacing: 12px; font-size: 12px; opacity: 0.8;">SYNCING_PROTOCOLS</p>
+    </div>
+
+    <div id="loadout-screen" class="screen">
+        <div class="char-placeholder">
+            <div style="text-align: center;">
+                <span style="font-size: 40px; display: block; margin-bottom: 10px;">👤</span>
+                <span style="opacity:0.4; letter-spacing:8px; font-size: 10px;">BIOMETRIC_SCAN_COMPLETE</span>
+            </div>
+        </div>
+
+        <div class="operator-panel">
+            <div style="font-size: 10px; color: var(--neon-cyan); opacity: 0.5; margin-bottom: 5px;">PROTOCOL // NEMESIS</div>
+            <div style="font-size: 26px; border-bottom: 1px solid var(--neon-cyan); margin-bottom: 25px; padding-bottom: 15px; letter-spacing: 5px; font-weight: bold;">LOBBY_01</div>
+            
+            <div class="item-slot">
+                <div><span style="font-size:9px; opacity:0.6;">LOADOUT A</span><br><b style="letter-spacing: 2px;">VOLT RIFLE</b></div>
+                <div style="font-size: 18px;">⚡</div>
+            </div>
+
+            <div class="item-slot">
+                <div><span style="font-size:9px; opacity:0.6;">LOADOUT B</span><br><b style="letter-spacing: 2px;">PLASMA BLADE</b></div>
+                <div style="font-size: 18px;">⚔️</div>
+            </div>
+
+            <div class="item-slot" style="margin-bottom: 40px;">
+                <div><span style="font-size:9px; opacity:0.6;">SUPPORT</span><br><b style="letter-spacing: 2px;">CYBER SCAN</b></div>
+                <div style="font-size: 18px;">👁️</div>
+            </div>
+
+            <button class="deploy-btn" onclick="this.innerText='COMMENCING...'">DEPLOY</button>
+            <p style="text-align: center; font-size: 10px; margin-top: 20px; cursor: pointer; opacity: 0.4;" onclick="location.reload()">[ ABORT_CONNECTION ]</p>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loading-screen');
+            const lobby = document.getElementById('loadout-screen');
+            const viewport = document.getElementById('viewport');
+
+            // 1. Initial delay for "loading"
+            setTimeout(() => {
+                // 2. Fade out loader
+                loader.style.opacity = '0';
+                
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    lobby.style.display = 'flex';
+                    
+                    // 3. Trigger the viewport and the sliding panels
+                    setTimeout(() => {
+                        viewport.style.opacity = '1';
+                        viewport.style.transform = 'scale(1) rotateX(0deg)'; // Grid levels out
+                        lobby.classList.add('slide-in-active');
+                    }, 100);
+                }, 800);
+
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
